@@ -8,16 +8,24 @@ import os
 from imguralbum import *
 import re
 
+def is_valid(thing):
+    # Could make this a single boolean statement
+    # but that's a maintenance nightmare.
+    if not thing.is_self:
+        if thing.over_18 and args.no_nsfw:
+            return False
+        if thing.score < args.score:
+            return False
+        if "imgur.com" in thing.url:
+            return True
+
+    return False
+
 def get_urls(generator, args):
     urls = []
     for thing in generator:
-        if not thing.is_self:
-            if thing.over_18 and args.no_nsfw:
-                continue
-            if thing.score < args.score:
-                continue
-            if thing.url not in urls and "imgur.com" in thing.url:
-                urls.append(thing.url)
+        if is_valid(thing) and thing.url not in urls:
+            urls.append(thing.url)
     return urls
 
 def download_images(url, args):
@@ -98,13 +106,34 @@ def subreddit_retrieve(r, args):
     for link in links:
         download_images(link, args)
 
+def post_retrieve(r, args):
+    submission_id = ""
+
+    m = re.match(r"(?:https?\:\/\/)?(?:www\.)?reddit.com\/r\/(?P<sub>\w+)\/comments\/(?P<id>\w+).+", args.post)
+
+    if m:
+        submission_id = m.group("id")
+    else:
+        m = re.match(r"(?:https?\:\/\/)?redd\.it\/(?P<id>\w+)", args.post)
+        if m:
+            submission_id = m.group("id")
+
+    submission = r.get_submission(submission_id = submission_id)
+
+    if(is_valid(submission)):
+        download_images(submission.url, args)
+    else:
+        print "Invalid URL given: {}".format(submission.url)
+
+
 if __name__ == "__main__":
     user_agent = "Image retriever 1.0.0 by /u/Rapptz"
     r = praw.Reddit(user_agent=user_agent)
-    parser = argparse.ArgumentParser(description="Downloads imgur images from a user and/or subreddit.",
+    parser = argparse.ArgumentParser(description="Downloads imgur images from a user, subreddit, and/or post.",
                                      usage="%(prog)s [options...]")
     parser.add_argument("--username", help="username to scrap and download from", metavar="user")
     parser.add_argument("--subreddit", help="subreddit to scrap and download from", metavar="sub")
+    parser.add_argument("--post", help="post to scrap and download from", metavar="url")
 
     parser.add_argument("--sort", help="choose the sort order for submissions (default: new)", 
                                   choices=["hot", "new", "controversial", "top"], metavar="type", default="new")
@@ -113,7 +142,7 @@ if __name__ == "__main__":
                                    default=100, metavar="num")
 
     parser.add_argument("-q", "--quiet", action="store_true", help="doesn't print image download progress")
-    parser.add_argument("-o", "--output", help="where to output the downloaded images", metavar="")
+    parser.add_argument("-o", "--output", help="where to output the downloaded images", metavar="", default=".")
     parser.add_argument("--no-nsfw", action="store_true", help="only downloads images not marked nsfw")
 
     parser.add_argument("--score", help="minimum score of the image to download (default: 1)", type=int, 
@@ -129,3 +158,6 @@ if __name__ == "__main__":
 
     if args.subreddit:
         subreddit_retrieve(r, args)
+
+    if args.post:
+        post_retrieve(r, args)
