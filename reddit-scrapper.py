@@ -81,7 +81,7 @@ def download_images(url, args):
 
 def redditor_retrieve(r, args):
     user = r.get_redditor(args.username)
-    gen = user.get_submitted(limit=args.limit)
+    gen = user.get_submitted(sort=args.sort, limit=args.limit)
 
     links = get_urls(gen, args)
     for link in links:
@@ -102,13 +102,19 @@ if __name__ == "__main__":
                                      usage="%(prog)s [options...]")
     parser.add_argument("--username", help="username to scrap and download from", metavar="user")
     parser.add_argument("--subreddit", help="subreddit to scrap and download from", metavar="sub")
-    parser.add_argument("--sort", help="Choose the sort order for subreddit submissions", 
-                                  choices=["hot", "new", "controversial", "top"], metavar="type", default="hot")
-    parser.add_argument("--limit", type=int, help="number of reddit submissions to look for", default=100, metavar="num")
+
+    parser.add_argument("--sort", help="choose the sort order for submissions (default: new)", 
+                                  choices=["hot", "new", "controversial", "top"], metavar="type", default="new")
+
+    parser.add_argument("--limit", type=int, help="number of submissions to look for (default: 100)",
+                                   default=100, metavar="num")
+
     parser.add_argument("-q", "--quiet", action="store_true", help="doesn't print image download progress")
     parser.add_argument("-o", "--output", help="where to output the downloaded images", metavar="")
     parser.add_argument("--no-nsfw", action="store_true", help="only downloads images not marked nsfw")
-    parser.add_argument("--score", help="minimum score of the image to download", type=int, metavar="num", default=1)
+
+    parser.add_argument("--score", help="minimum score of the image to download (default: 1)", type=int, 
+                                   metavar="num", default=1)
 
     args = parser.parse_args()
 
