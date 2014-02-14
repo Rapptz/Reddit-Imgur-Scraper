@@ -11,7 +11,7 @@ import re
 def get_urls(generator, args):
     urls = []
     for thing in generator:
-        if thing.is_self:
+        if not thing.is_self:
             if thing.over_18 and args.no_nsfw:
                 pass
             if thing.url not in urls and "imgur.com" in thing.url:
@@ -85,7 +85,13 @@ def redditor_retrieve(r, args):
     for link in links:
         download_images(link, args)
 
-
+def subreddit_retrieve(r, args):
+    sub = r.get_subreddit(args.subreddit)
+    method = getattr(sub, "get_{}".format(args.sort))
+    gen = method(limit=args.limit)
+    links = get_urls(gen, args)
+    for link in links:
+        download_images(link, args)
 
 if __name__ == "__main__":
     user_agent = "Image retriever 1.0.0 by /u/Rapptz"
@@ -94,8 +100,10 @@ if __name__ == "__main__":
                                      usage="%(prog)s [options...]")
     parser.add_argument("--username", help="username to scrap and download from", metavar="user")
     parser.add_argument("--subreddit", help="subreddit to scrap and download from", metavar="sub")
+    parser.add_argument("--sort", help="Choose the sort order for subreddit submissions", 
+                                  choices=["hot", "new", "controversial", "top"], metavar="type", default="hot")
     parser.add_argument("--limit", type=int, help="number of reddit submissions to look for", default=100, metavar="num")
-    parser.add_argument("-q", "--quiet", action="store_true", help="doesn't print image download progress", default=False)
+    parser.add_argument("-q", "--quiet", action="store_true", help="doesn't print image download progress")
     parser.add_argument("-o", "--output", help="where to output the downloaded images", metavar="")
     parser.add_argument("--no-nsfw", action="store_true", help="only downloads images not marked nsfw")
 
@@ -103,3 +111,6 @@ if __name__ == "__main__":
 
     if args.username:
         redditor_retrieve(r, args)
+
+    if args.subreddit:
+        subreddit_retrieve(r, args)
