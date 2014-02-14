@@ -13,7 +13,9 @@ def get_urls(generator, args):
     for thing in generator:
         if not thing.is_self:
             if thing.over_18 and args.no_nsfw:
-                pass
+                continue
+            if thing.score < args.score:
+                continue
             if thing.url not in urls and "imgur.com" in thing.url:
                 urls.append(thing.url)
     return urls
@@ -60,7 +62,7 @@ def download_images(url, args):
 
 
         if not image_url:
-            print "Image url {} could not be properly parsed. (attempt: {})".format(url, image)
+            print "Image url {} could not be properly parsed.".format(url, image)
             return
 
         if not os.path.exists(args.output):
@@ -106,6 +108,7 @@ if __name__ == "__main__":
     parser.add_argument("-q", "--quiet", action="store_true", help="doesn't print image download progress")
     parser.add_argument("-o", "--output", help="where to output the downloaded images", metavar="")
     parser.add_argument("--no-nsfw", action="store_true", help="only downloads images not marked nsfw")
+    parser.add_argument("--score", help="minimum score of the image to download", type=int, metavar="num", default=1)
 
     args = parser.parse_args()
 
