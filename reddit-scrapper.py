@@ -25,6 +25,9 @@ def download_images(url, args):
     try:
         downloader = ImgurAlbumDownloader(url)
 
+        if download_images.num_images() > args.length:
+            return
+
         if not args.quiet:
             def image_progress(index, image_url, dest):
                 print "Downloading image {} of {} from album {} to {}".format(index, downloader.num_images(), url, dest)
@@ -115,6 +118,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--score", help="minimum score of the image to download (default: 1)", type=int, 
                                    metavar="num", default=1)
+
+    parser.add_argument("-l", "--length", help="skips album downloads over this length (default: 30)", type=int,
+                                          default=30, metavar="num")
 
     args = parser.parse_args()
 
