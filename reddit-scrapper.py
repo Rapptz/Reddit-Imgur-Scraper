@@ -25,7 +25,7 @@ def download_images(url, args):
     try:
         downloader = ImgurAlbumDownloader(url)
 
-        if download_images.num_images() > args.length:
+        if downloader.num_images() > args.length:
             return
 
         if not args.quiet:
