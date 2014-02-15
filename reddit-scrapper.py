@@ -50,7 +50,7 @@ def download_images(url, args):
             return
 
         # Check if it's a silly url.
-        m = re.match(r"(?:https?\:\/\/)?(?:www\.)?imgur\.com\/([a-zA-Z0-9]+)", url)
+        m = re.match(r"(?:https?\:\/\/)?(?:www\.)?(?:m\.)?imgur\.com\/([a-zA-Z0-9]+)", url)
         image = ''
         image_url = ''
         if m:
@@ -67,7 +67,7 @@ def download_images(url, args):
             if image:
                 image_url = "http:" + image.group(1)
         else:
-            image = re.match(r'(https?\:\/\/)?(?:www\.)?i\.imgur\.com\/([a-zA-Z0-9]+\.(?:jpg|jpeg|png|gif))', url)
+            image = re.match(r'(https?\:\/\/)?(?:www\.)?(?:m\.)?i\.imgur\.com\/([a-zA-Z0-9]+\.(?:jpg|jpeg|png|gif))', url)
             if image:
                 image_url = image.group(0)
 
