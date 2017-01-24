@@ -7,8 +7,8 @@ An imgur scrapper for reddit. Allows for scrapping of user pages and/or subreddi
 Scraps the first 100 submissions of rapptz and downloads imgur images to the rapptz directory.
 
 ```
-reddit-scrapper.py --username=rapptz -o rapptz
+reddit-scraper.py --username=rapptz -o rapptz
 ```
 
-For more help, type `reddit-scrapper.py --help`.
+For more help, type `reddit-scraper.py --help`.
 
